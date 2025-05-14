@@ -296,7 +296,7 @@ export default function TaskBoard() {
     }
 
     return (
-        <div className="container mx-auto min-h-screen  flex flex-col">
+        <div className="container mx-auto min-h-[calc(100vh-70px)] flex flex-col">
             {/* <Navbar onSearch={handleSearch} /> */}
             <div className="flex-1 p-4 md:p-6">
                 <div className="mb-6">
