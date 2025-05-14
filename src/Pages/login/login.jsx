@@ -88,7 +88,8 @@ const Login = () => {
                     localStorage.setItem("user", JSON.stringify(data.user));
     
                     alert("Login successful");
-                    navigate('/'); // Redirect to homepage
+                    window.location.href = "/";
+                    // navigate('/'); 
     
                     // Optional: Auto-logout after token expiry
                     const decoded = jwtDecode(data.token);
