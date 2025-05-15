@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react"
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd"
 import { Loader2, Plus, RefreshCw, Search } from 'lucide-react'
-
+import { Link, useNavigate } from "react-router-dom"
 import { TaskForm } from "../../component/task/TaskForm"
 import { TaskCard } from "../../component/task/TaskCard"
 
@@ -55,7 +55,8 @@ export default function TaskBoard() {
     const [error, setError] = useState(null)
     const userData = localStorage.getItem("user")
     const parsedData = JSON.parse(userData); // Convert JSON string to object
-    const email = parsedData.email;
+    const email = parsedData?.email;
+    const navigate = useNavigate();
 
     // Fetch tasks from API on component mount
     useEffect(() => {
@@ -469,6 +470,13 @@ export default function TaskBoard() {
             </div>
         )
     }
+    const handleAddClick = (columnId) => {
+        if (!email) {
+            navigate('/login');
+        } else {
+            setAddingTaskToColumn(columnId);
+        }
+    };
 
     if (isLoading) {
         return (
@@ -526,7 +534,8 @@ export default function TaskBoard() {
                                 <div key={column.id} className="flex flex-col h-full">
                                     <ColumnHeader
                                         column={column}
-                                        onAddClick={() => setAddingTaskToColumn(column.id)}
+                                        // onAddClick={() => setAddingTaskToColumn(column.id)}
+                                        onAddClick={() => handleAddClick(column.id)}
                                     />
                                     {/* check user has */}
                                     {addingTaskToColumn === column.id && (
