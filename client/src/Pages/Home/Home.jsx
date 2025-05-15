@@ -451,11 +451,11 @@ export default function TaskBoard() {
                         </div>
                     </div>
 
-                    {error && (
+                    {/* {error && (
                         <div className="mt-2 p-2 bg-red-100 border border-red-300 text-red-800 rounded-md">
                             {error}
                         </div>
-                    )}
+                    )} */}
                 </div>
 
                 <DragDropContext onDragEnd={handleDragEnd}>
