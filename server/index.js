@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const { MongoClient, ServerApiVersion } = require('mongodb');
+const { ObjectId } = require('mongodb'); // Add this at the top of the file if not already imported
 const jwt = require('jsonwebtoken');
 const app = express();
 const port = process.env.PORT || 3000;
@@ -75,7 +76,7 @@ async function run() {
             }
         });
         // get user by id and send to client user data as response
-        const { ObjectId } = require('mongodb'); // Add this at the top of the file if not already imported
+
 
         app.get('/user/:id', async (req, res) => {
             const { id } = req.params;
