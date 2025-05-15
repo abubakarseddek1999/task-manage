@@ -17,6 +17,25 @@ A simple and responsive task management web application built with **React**, **
 - 🔄 Drag & Drop (Optional with `react-beautiful-dnd`)
 - 📦 Vercel (Deployment)
 
+### Backend:
+- 🌐 Node.js
+- 🚀 Express.js
+- 🔐 JWT for Authentication (optional)
+- 🗂 MongoDB (if used)
+
+---
+
+## 📸 Features
+
+- 🔐 User authentication (Login/Signup)
+- ✅ Task creation, update, delete
+- 📌 Task sorting by status
+- 📦 Backend API Integration
+- 📱 Responsive design
+
+---
+
+
 ---
 ```bash
 # Clone the repository
