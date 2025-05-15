@@ -29,6 +29,8 @@ async function run() {
         // Connect the client to the server	(optional starting in v4.7)
         await client.connect();
         const userCollection = client.db("task-management").collection("users");
+        const taskCollection = client.db("task-management").collection("tasks");
+
 
 
         app.post('/users', async (req, res) => {
@@ -80,6 +82,61 @@ async function run() {
                 }
             } catch (error) {
                 res.status(500).json({ error: "Invalid ID format or server error" });
+            }
+        });
+
+        // make api for add task and send to client task data as response 
+        app.post('/tasks', async (req, res) => {
+            const { task } = req.body;
+            try {
+                const result = await taskCollection.insertOne(task);
+                res.json(result);
+            } catch (error) {
+                res.status(500).json({ error });
+            }
+        });
+
+        // make api for get all task and send to client task data as response 
+        app.get('/tasks', async (req, res) => {
+            try {
+                const result = await taskCollection.find({}).toArray();
+                res.json(result);
+            } catch (error) {
+                res.status(500).json({ error });
+            }
+        });
+
+        // make api for get task by id and send to client task data as response 
+        app.get('/task/:id', async (req, res) => {
+            const { id } = req.params;
+            try {
+                const result = await taskCollection.findOne({ _id: new ObjectId(id) });
+                res.json(result);
+            } catch (error) {
+                res.status(500).json({ error });
+            }
+        });
+
+        // make api for update task by id and send to client task data as response 
+        app.put('/task/:id', async (req, res) => {
+            const { id } = req.params;
+            const { task } = req.body;
+            try {
+                const result = await taskCollection.updateOne({ _id: new ObjectId(id) }, { $set: task });
+                res.json(result);
+            } catch (error) {
+                res.status(500).json({ error });
+            }
+        });
+
+        // make api for delete task by id and send to client task data as response 
+        app.delete('/task/:id', async (req, res) => {
+            const { id } = req.params;
+            try {
+                const result = await taskCollection.deleteOne({ _id: new ObjectId(id) });
+                res.json(result);
+            } catch (error) {
+                res.status(500).json({ error });
             }
         });
 

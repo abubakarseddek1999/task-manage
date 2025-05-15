@@ -13,13 +13,17 @@ export function TaskForm({ onSubmit, onCancel, initialTask = null }) {
   const handleSubmit = (e) => {
     e.preventDefault()
     if (!content.trim()) return
+    // if have a user data in local storage get it
+    const userData = localStorage.getItem("user")
+    const parsedData = JSON.parse(userData);
+    const userName = parsedData.name;
 
     onSubmit({
       content,
       date,
       priority,
       label,
-      assignee: initialTask ? initialTask.assignee : "JD",
+      assigne: userName,
     })
   }
 

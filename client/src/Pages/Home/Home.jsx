@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd"
+import { Loader2, Plus, Edit, Trash2, X, Search } from 'lucide-react'
 
 import { TaskForm } from "../../component/task/TaskForm"
 import { ColumnHeader } from "../../component/task/ColumnHeader"
@@ -171,6 +172,8 @@ export default function TaskBoard() {
     const [editingTask, setEditingTask] = useState(null)
     const [searchTerm, setSearchTerm] = useState("")
     const [filteredTasks, setFilteredTasks] = useState(initialTasks)
+    const [isCreating, setIsCreating] = useState(false)
+    const [createError, setCreateError] = useState(null)
 
     // Filter tasks based on search term
     useEffect(() => {
@@ -239,27 +242,105 @@ export default function TaskBoard() {
         })
     }
 
-    const addNewTask = (columnId, taskData) => {
-        const newTaskId = `task-${Date.now()}`
+    // Function to create a task in the database
+    const createTaskInDatabase = async (taskData, columnId) => {
+        try {
+            setIsCreating(true)
+            setCreateError(null)
+            
+            // Prepare task data for API
+            const newTaskData = {
+                title: taskData.content,
+                priority: taskData.priority,
+                label: taskData.label,
+                dueDate: taskData.date,
+                assigne: taskData.assigne,
+                status: columnId
+            }
+            
+            console.log("Creating task with data:", newTaskData)
+            
+            const response = await fetch('http://localhost:3000/tasks', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ task: newTaskData })
+            })
+            
+            if (!response.ok) {
+                throw new Error(`Error: ${response.status}`)
+            }
+            
+            const result = await response.json()
+            console.log("Task created successfully:", result)
+            return result
+        } catch (err) {
+            console.error("Failed to create task:", err)
+            setCreateError("Failed to create task in database. Using local storage instead.")
+            return null
+        } finally {
+            setIsCreating(false)
+        }
+    }
+
+    const addNewTask = async (columnId, taskData) => {
+        // Generate a temporary ID for the task
+        const tempId = `task-${Date.now()}`
+        
+        // Create the task object
         const newTask = {
-            id: newTaskId,
+            id: tempId,
             ...taskData,
         }
-
-        setTasks({
-            ...tasks,
-            [newTaskId]: newTask,
-        })
-
+        
+        // Update local state first for immediate UI feedback
+        setTasks(prevTasks => ({
+            ...prevTasks,
+            [tempId]: newTask
+        }))
+        
         const column = columns[columnId]
-        setColumns({
-            ...columns,
+        setColumns(prevColumns => ({
+            ...prevColumns,
             [columnId]: {
                 ...column,
-                taskIds: [...column.taskIds, newTaskId],
-            },
-        })
-
+                taskIds: [...column.taskIds, tempId]
+            }
+        }))
+        
+        // Try to create the task in the database
+        try {
+            const result = await createTaskInDatabase(taskData, columnId)
+            
+            if (result && result.insertedId) {
+                console.log(`Task created in database with ID: ${result.insertedId}`)
+                
+                // If you want to update the local task with the database ID, you could do:
+                // const dbId = result.insertedId
+                // setTasks(prevTasks => {
+                //     const updatedTasks = { ...prevTasks }
+                //     delete updatedTasks[tempId]
+                //     updatedTasks[dbId] = { ...newTask, id: dbId }
+                //     return updatedTasks
+                // })
+                // 
+                // setColumns(prevColumns => {
+                //     const column = prevColumns[columnId]
+                //     return {
+                //         ...prevColumns,
+                //         [columnId]: {
+                //             ...column,
+                //             taskIds: column.taskIds.map(id => id === tempId ? dbId : id)
+                //         }
+                //     }
+                // })
+            }
+        } catch (error) {
+            console.error("Error saving task to database:", error)
+            // Task is already in local state, so we don't need to do anything else
+        }
+        
         setAddingTaskToColumn(null)
     }
 
@@ -301,7 +382,25 @@ export default function TaskBoard() {
             <div className="flex-1 p-4 md:p-6">
                 <div className="mb-6">
                     <h1 className="text-2xl font-bold text-gray-900 mb-2">Task Management Board</h1>
-                    <p className="text-gray-600">Organize your tasks by dragging and dropping between columns</p>
+                    <div className="flex justify-between items-center">
+                        <p className="text-gray-600">Organize your tasks by dragging and dropping between columns</p>
+                        <div className="relative">
+                            <input
+                                type="text"
+                                placeholder="Search tasks..."
+                                className="px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                value={searchTerm}
+                                onChange={(e) => handleSearch(e.target.value)}
+                            />
+                            <Search className="absolute right-3 top-2.5 h-4 w-4 text-gray-400" />
+                        </div>
+                    </div>
+                    
+                    {createError && (
+                        <div className="mt-2 p-2 bg-yellow-100 border border-yellow-300 text-yellow-800 rounded-md">
+                            {createError}
+                        </div>
+                    )}
                 </div>
 
                 <DragDropContext onDragEnd={handleDragEnd}>
@@ -316,10 +415,17 @@ export default function TaskBoard() {
                                     <ColumnHeader column={column} onAddClick={() => setAddingTaskToColumn(column.id)} />
 
                                     {addingTaskToColumn === column.id && (
-                                        <TaskForm
-                                            onSubmit={(taskData) => addNewTask(column.id, taskData)}
-                                            onCancel={() => setAddingTaskToColumn(null)}
-                                        />
+                                        <div className="relative">
+                                            <TaskForm
+                                                onSubmit={(taskData) => addNewTask(column.id, taskData)}
+                                                onCancel={() => setAddingTaskToColumn(null)}
+                                            />
+                                            {isCreating && (
+                                                <div className="absolute inset-0 bg-white bg-opacity-70 flex items-center justify-center">
+                                                    <Loader2 className="w-6 h-6 animate-spin text-blue-500" />
+                                                </div>
+                                            )}
+                                        </div>
                                     )}
 
                                     <Droppable droppableId={column.id}>
