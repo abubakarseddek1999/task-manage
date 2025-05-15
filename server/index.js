@@ -118,16 +118,25 @@ async function run() {
         });
 
         // make api for update task by id and send to client task data as response 
-        app.put('/task/:id', async (req, res) => {
+        app.patch('/task/:id', async (req, res) => {
             const { id } = req.params;
             const { task } = req.body;
+          
+            // _id ফিল্ড সরিয়ে ফেলো
+            const { _id, ...taskDataWithoutId } = task;
+          
             try {
-                const result = await taskCollection.updateOne({ _id: new ObjectId(id) }, { $set: task });
-                res.json(result);
+              const result = await taskCollection.updateOne(
+                { _id: new ObjectId(id) },
+                { $set: taskDataWithoutId }
+              );
+              res.json(result);
             } catch (error) {
-                res.status(500).json({ error });
+              console.error("Update error:", error);
+              res.status(500).json({ error: "Failed to update task" });
             }
-        });
+          });
+          
 
         // make api for delete task by id and send to client task data as response 
         app.delete('/task/:id', async (req, res) => {

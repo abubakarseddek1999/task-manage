@@ -2,178 +2,62 @@
 
 import { useState, useEffect } from "react"
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd"
-import { Loader2, Plus, Edit, Trash2, X, Search } from 'lucide-react'
+import { Loader2, Plus, RefreshCw, Search } from 'lucide-react'
 
 import { TaskForm } from "../../component/task/TaskForm"
-import { ColumnHeader } from "../../component/task/ColumnHeader"
 import { TaskCard } from "../../component/task/TaskCard"
 
-// Initial data structure with updated colors and more realistic tasks
+// Initial column structure with colors
 const initialColumns = {
     todo: {
         id: "todo",
         title: "To Do",
-        taskIds: ["task-1", "task-2", "task-3", "task-4"],
+        taskIds: [],
         color: "bg-[#8EADC1]",
         textColor: "text-white",
     },
     inprogress: {
         id: "inprogress",
         title: "In Progress",
-        taskIds: ["task-5", "task-6", "task-7", "task-8"],
+        taskIds: [],
         color: "bg-[#7BC86C]",
         textColor: "text-white",
     },
     review: {
         id: "review",
         title: "In Review",
-        taskIds: ["task-9", "task-10", "task-11", "task-12"],
+        taskIds: [],
         color: "bg-[#8A75C9]",
         textColor: "text-white",
     },
     Completed: {
         id: "Completed",
         title: "Completed",
-        taskIds: ["task-13", "task-14", "task-15"],
+        taskIds: [],
         color: "bg-[#F5C24C]",
         textColor: "text-white",
-    },
-}
-
-const initialTasks = {
-    "task-1": {
-        id: "task-1",
-        content: "Find a New Product for Commerce",
-        priority: "high",
-        label: "bg-red-500",
-        date: "Sun, Jun 30",
-        assignee: "JD",
-    },
-    "task-2": {
-        id: "task-2",
-        content: "Book Flights",
-        priority: "medium",
-        label: "",
-        date: "",
-        assignee: "AK",
-    },
-    "task-3": {
-        id: "task-3",
-        content: "Redesign eNewsletter Page",
-        priority: "low",
-        label: "bg-orange-500",
-        date: "",
-        assignee: "JD",
-    },
-    "task-4": {
-        id: "task-4",
-        content: "Review Ad Brief",
-        priority: "medium",
-        label: "",
-        date: "",
-        assignee: "AK",
-    },
-    "task-5": {
-        id: "task-5",
-        content: "Pricing Page",
-        priority: "medium",
-        label: "",
-        date: "",
-        assignee: "JD",
-    },
-    "task-6": {
-        id: "task-6",
-        content: "Confirm Launch Date",
-        priority: "high",
-        label: "",
-        date: "",
-        assignee: "AK",
-    },
-    "task-7": {
-        id: "task-7",
-        content: "Decide on Travel Date",
-        priority: "medium",
-        label: "",
-        date: "",
-        assignee: "JD",
-    },
-    "task-8": {
-        id: "task-8",
-        content: "Campaign Performance Dashboard",
-        priority: "low",
-        label: "bg-orange-500",
-        date: "Wed, Jun 19",
-        assignee: "AK",
-    },
-    "task-9": {
-        id: "task-9",
-        content: "Open Position Description",
-        priority: "high",
-        label: "bg-red-500",
-        date: "",
-        assignee: "JD",
-    },
-    "task-10": {
-        id: "task-10",
-        content: "New Homepage Design",
-        priority: "medium",
-        label: "bg-red-500",
-        date: "Sun, Jun 30",
-        assignee: "AK",
-    },
-    "task-11": {
-        id: "task-11",
-        content: "Customer Stories Homepage",
-        priority: "low",
-        label: "bg-yellow-500",
-        date: "Tue, Jun 11",
-        assignee: "JD",
-    },
-    "task-12": {
-        id: "task-12",
-        content: "iOS Push on Copy Message",
-        priority: "medium",
-        label: "",
-        date: "",
-        assignee: "AK",
-    },
-    "task-13": {
-        id: "task-13",
-        content: "PPC Campaign",
-        priority: "high",
-        label: "bg-yellow-500",
-        date: "Fri, Nov 15",
-        assignee: "JD",
-    },
-    "task-14": {
-        id: "task-14",
-        content: "Ad Implementation",
-        priority: "medium",
-        label: "",
-        date: "",
-        assignee: "AK",
-    },
-    "task-15": {
-        id: "task-15",
-        content: "Dashboard Creation",
-        priority: "low",
-        label: "",
-        date: "Sun, Oct 19",
-        assignee: "JD",
     },
 }
 
 const columnOrder = ["todo", "inprogress", "review", "Completed"]
 
 export default function TaskBoard() {
-    const [tasks, setTasks] = useState(initialTasks)
+    const [tasks, setTasks] = useState({})
     const [columns, setColumns] = useState(initialColumns)
     const [addingTaskToColumn, setAddingTaskToColumn] = useState(null)
     const [editingTask, setEditingTask] = useState(null)
     const [searchTerm, setSearchTerm] = useState("")
-    const [filteredTasks, setFilteredTasks] = useState(initialTasks)
+    const [filteredTasks, setFilteredTasks] = useState({})
+    const [isLoading, setIsLoading] = useState(true)
     const [isCreating, setIsCreating] = useState(false)
-    const [createError, setCreateError] = useState(null)
+    const [isUpdating, setIsUpdating] = useState(false)
+    const [isDeleting, setIsDeleting] = useState(false)
+    const [error, setError] = useState(null)
+
+    // Fetch tasks from API on component mount
+    useEffect(() => {
+        fetchTasks()
+    }, [])
 
     // Filter tasks based on search term
     useEffect(() => {
@@ -192,61 +76,70 @@ export default function TaskBoard() {
         setFilteredTasks(filtered)
     }, [searchTerm, tasks])
 
-    const handleDragEnd = (result) => {
-        const { destination, source, draggableId } = result
-
-        // If there's no destination or if the item was dropped back in the same position
-        if (!destination || (destination.droppableId === source.droppableId && destination.index === source.index)) {
-            return
-        }
-
-        // Get source and destination columns
-        const sourceColumn = columns[source.droppableId]
-        const destColumn = columns[destination.droppableId]
-
-        // If moving within the same column
-        if (sourceColumn.id === destColumn.id) {
-            const newTaskIds = Array.from(sourceColumn.taskIds)
-            newTaskIds.splice(source.index, 1)
-            newTaskIds.splice(destination.index, 0, draggableId)
-
-            const newColumn = {
-                ...sourceColumn,
-                taskIds: newTaskIds,
+    // Fetch tasks from the API
+    const fetchTasks = async () => {
+        try {
+            setIsLoading(true)
+            setError(null)
+            
+            const response = await fetch('http://localhost:3000/tasks')
+            if (!response.ok) {
+                throw new Error(`Error: ${response.status}`)
             }
-
-            setColumns({
-                ...columns,
-                [newColumn.id]: newColumn,
+            
+            const tasksData = await response.json()
+            console.log("Fetched tasks:", tasksData)
+            
+            // Transform API data to our app's format
+            const tasksById = {}
+            const columnsCopy = JSON.parse(JSON.stringify(initialColumns))
+            
+            tasksData.forEach((task) => {
+                // Determine which column this task belongs to
+                const status = task.status || 'todo'
+                const columnId = status.toLowerCase()
+                
+                // Create task object in our format
+                tasksById[task._id] = {
+                    id: task._id,
+                    content: task.title,
+                    priority: task.priority || "medium",
+                    label: task.label || "",
+                    date: task.dueDate || "",
+                    assignee: task.assignee || task.assigne || "",
+                    status: columnId,
+                    // Keep original data for API updates
+                    originalData: task
+                }
+                
+                // Add task to appropriate column
+                if (columnsCopy[columnId]) {
+                    columnsCopy[columnId].taskIds.push(task._id)
+                } else if (columnId === "completed") {
+                    // Handle case sensitivity for "Completed" column
+                    columnsCopy.Completed.taskIds.push(task._id)
+                } else {
+                    // If column doesn't exist, add to todo
+                    columnsCopy.todo.taskIds.push(task._id)
+                }
             })
-            return
+            
+            setTasks(tasksById)
+            setColumns(columnsCopy)
+            setFilteredTasks(tasksById)
+        } catch (err) {
+            console.error("Failed to fetch tasks:", err)
+            setError("Failed to load tasks. Please try again.")
+        } finally {
+            setIsLoading(false)
         }
-
-        // Moving from one column to another
-        const sourceTaskIds = Array.from(sourceColumn.taskIds)
-        sourceTaskIds.splice(source.index, 1)
-
-        const destTaskIds = Array.from(destColumn.taskIds)
-        destTaskIds.splice(destination.index, 0, draggableId)
-
-        setColumns({
-            ...columns,
-            [sourceColumn.id]: {
-                ...sourceColumn,
-                taskIds: sourceTaskIds,
-            },
-            [destColumn.id]: {
-                ...destColumn,
-                taskIds: destTaskIds,
-            },
-        })
     }
 
-    // Function to create a task in the database
-    const createTaskInDatabase = async (taskData, columnId) => {
+    // Create a task in the database
+    const createTask = async (columnId, taskData) => {
         try {
             setIsCreating(true)
-            setCreateError(null)
+            setError(null)
             
             // Prepare task data for API
             const newTaskData = {
@@ -254,7 +147,7 @@ export default function TaskBoard() {
                 priority: taskData.priority,
                 label: taskData.label,
                 dueDate: taskData.date,
-                assigne: taskData.assigne,
+                assigne: taskData.assigne, // Using the field name from your TaskForm
                 status: columnId
             }
             
@@ -274,114 +167,275 @@ export default function TaskBoard() {
             
             const result = await response.json()
             console.log("Task created successfully:", result)
+            
+            // Refresh tasks to get the latest data
+            await fetchTasks()
+            
             return result
         } catch (err) {
             console.error("Failed to create task:", err)
-            setCreateError("Failed to create task in database. Using local storage instead.")
-            return null
+            setError("Failed to create task. Please try again.")
+            throw err
         } finally {
             setIsCreating(false)
         }
     }
 
-    const addNewTask = async (columnId, taskData) => {
-        // Generate a temporary ID for the task
-        const tempId = `task-${Date.now()}`
-        
-        // Create the task object
-        const newTask = {
-            id: tempId,
-            ...taskData,
-        }
-        
-        // Update local state first for immediate UI feedback
-        setTasks(prevTasks => ({
-            ...prevTasks,
-            [tempId]: newTask
-        }))
-        
-        const column = columns[columnId]
-        setColumns(prevColumns => ({
-            ...prevColumns,
-            [columnId]: {
-                ...column,
-                taskIds: [...column.taskIds, tempId]
-            }
-        }))
-        
-        // Try to create the task in the database
+    // Update a task in the database
+    const updateTaskInDb = async (taskId, updatedData) => {
         try {
-            const result = await createTaskInDatabase(taskData, columnId)
+            setIsUpdating(true)
+            setError(null)
             
-            if (result && result.insertedId) {
-                console.log(`Task created in database with ID: ${result.insertedId}`)
-                
-                // If you want to update the local task with the database ID, you could do:
-                // const dbId = result.insertedId
-                // setTasks(prevTasks => {
-                //     const updatedTasks = { ...prevTasks }
-                //     delete updatedTasks[tempId]
-                //     updatedTasks[dbId] = { ...newTask, id: dbId }
-                //     return updatedTasks
-                // })
-                // 
-                // setColumns(prevColumns => {
-                //     const column = prevColumns[columnId]
-                //     return {
-                //         ...prevColumns,
-                //         [columnId]: {
-                //             ...column,
-                //             taskIds: column.taskIds.map(id => id === tempId ? dbId : id)
-                //         }
-                //     }
-                // })
+            console.log("Updating task:", taskId, "with data:", updatedData)
+            
+            const response = await fetch(`http://localhost:3000/task/${taskId}`, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ task: updatedData })
+            })
+            
+            if (!response.ok) {
+                throw new Error(`Error: ${response.status}`)
             }
-        } catch (error) {
-            console.error("Error saving task to database:", error)
-            // Task is already in local state, so we don't need to do anything else
+            
+            const result = await response.json()
+            console.log("Task updated successfully:", result)
+            
+            return result
+        } catch (err) {
+            console.error("Failed to update task:", err)
+            setError("Failed to update task. Please try again.")
+            throw err
+        } finally {
+            setIsUpdating(false)
         }
-        
-        setAddingTaskToColumn(null)
     }
 
-    const updateTask = (taskId, columnId, taskData) => {
-        setTasks({
-            ...tasks,
-            [taskId]: {
-                ...tasks[taskId],
-                ...taskData,
-            },
-        })
-        setEditingTask(null)
+    // Delete a task from the database
+    const deleteTaskFromDb = async (taskId) => {
+        try {
+            setIsDeleting(true)
+            setError(null)
+            
+            console.log("Deleting task:", taskId)
+            
+            const response = await fetch(`http://localhost:3000/task/${taskId}`, {
+                method: 'DELETE'
+            })
+            
+            if (!response.ok) {
+                throw new Error(`Error: ${response.status}`)
+            }
+            
+            const result = await response.json()
+            console.log("Task deleted successfully:", result)
+            
+            return result
+        } catch (err) {
+            console.error("Failed to delete task:", err)
+            setError("Failed to delete task. Please try again.")
+            throw err
+        } finally {
+            setIsDeleting(false)
+        }
     }
 
-    const deleteTask = (taskId, columnId) => {
-        const newTasks = { ...tasks }
-        delete newTasks[taskId]
+    // Handle drag and drop
+    const handleDragEnd = async (result) => {
+        const { destination, source, draggableId } = result
 
-        const column = columns[columnId]
-        const newTaskIds = column.taskIds.filter((id) => id !== taskId)
+        // If there's no destination or if the item was dropped back in the same position
+        if (!destination || (destination.droppableId === source.droppableId && destination.index === source.index)) {
+            return
+        }
 
-        setTasks(newTasks)
+        // Get source and destination columns
+        const sourceColumn = columns[source.droppableId]
+        const destColumn = columns[destination.droppableId]
+
+        // Create new arrays of taskIds
+        const sourceTaskIds = Array.from(sourceColumn.taskIds)
+        sourceTaskIds.splice(source.index, 1)
+
+        const destTaskIds = Array.from(destColumn.taskIds)
+        destTaskIds.splice(destination.index, 0, draggableId)
+
+        // Update local state first for immediate UI feedback
         setColumns({
             ...columns,
-            [columnId]: {
-                ...column,
-                taskIds: newTaskIds,
+            [sourceColumn.id]: {
+                ...sourceColumn,
+                taskIds: sourceTaskIds,
+            },
+            [destColumn.id]: {
+                ...destColumn,
+                taskIds: destTaskIds,
             },
         })
+
+        // Update task status in the database
+        try {
+            const task = tasks[draggableId]
+            const updatedTask = {
+                ...task.originalData,
+                status: destColumn.id
+            }
+            
+            await updateTaskInDb(draggableId, updatedTask)
+            
+            // Update local task state
+            setTasks({
+                ...tasks,
+                [draggableId]: {
+                    ...task,
+                    status: destColumn.id,
+                    originalData: updatedTask
+                }
+            })
+        } catch (err) {
+            // Revert to previous state if API call fails
+            setColumns({
+                ...columns,
+                [sourceColumn.id]: sourceColumn,
+                [destColumn.id]: destColumn,
+            })
+        }
+    }
+
+    // Add a new task
+    const addNewTask = async (columnId, taskData) => {
+        try {
+            const result = await createTask(columnId, taskData)
+            setAddingTaskToColumn(null)
+        } catch (err) {
+            // Error is already handled in createTask
+        }
+    }
+
+    // Update a task
+    const updateTask = async (taskId, columnId, taskData) => {
+        try {
+            const existingTask = tasks[taskId]
+            
+            if (!existingTask) {
+                throw new Error(`Task with ID ${taskId} not found`)
+            }
+            
+            // Prepare updated task data for API
+            const updatedTaskData = {
+                ...existingTask.originalData,
+                title: taskData.content,
+                priority: taskData.priority,
+                label: taskData.label,
+                dueDate: taskData.date,
+                assigne: taskData.assigne // Using the field name from your TaskForm
+            }
+            
+            // Update local state first for immediate UI feedback
+            setTasks({
+                ...tasks,
+                [taskId]: {
+                    ...existingTask,
+                    content: taskData.content,
+                    priority: taskData.priority,
+                    label: taskData.label,
+                    date: taskData.date,
+                    assignee: taskData.assigne,
+                }
+            })
+            
+            // Send to API
+            await updateTaskInDb(taskId, updatedTaskData)
+            
+            // Refresh tasks to get the latest data
+            await fetchTasks()
+            
+            setEditingTask(null)
+        } catch (err) {
+            // Error is already handled in updateTaskInDb
+        }
+    }
+
+    // Delete a task
+    const deleteTask = async (taskId, columnId) => {
+        try {
+            // Update local state first for immediate UI feedback
+            const newTasks = { ...tasks }
+            delete newTasks[taskId]
+            
+            const column = columns[columnId]
+            const newTaskIds = column.taskIds.filter((id) => id !== taskId)
+            
+            setTasks(newTasks)
+            setColumns({
+                ...columns,
+                [columnId]: {
+                    ...column,
+                    taskIds: newTaskIds,
+                }
+            })
+            
+            // Delete from API
+            await deleteTaskFromDb(taskId)
+        } catch (err) {
+            // Error is already handled in deleteTaskFromDb
+            // Refresh tasks to restore the correct state
+            fetchTasks()
+        }
     }
 
     const handleSearch = (query) => {
         setSearchTerm(query)
     }
 
+    // Column Header Component
+    const ColumnHeader = ({ column, onAddClick }) => {
+        return (
+            <div className={`${column.color} ${column.textColor} p-3 rounded-t-lg flex justify-between items-center`}>
+                <div className="flex items-center">
+                    <h3 className="font-semibold">{column.title}</h3>
+                    <span className="ml-2 bg-white bg-opacity-30 text-white text-xs px-2 py-1 rounded-full">
+                        {column.taskIds.length}
+                    </span>
+                </div>
+                <button
+                    className="h-8 w-8 flex items-center justify-center text-white rounded-full hover:bg-white hover:bg-opacity-20"
+                    onClick={onAddClick}
+                >
+                    <Plus className="h-5 w-5" />
+                    <span className="sr-only">Add task</span>
+                </button>
+            </div>
+        )
+    }
+
+    if (isLoading) {
+        return (
+            <div className="flex items-center justify-center min-h-[calc(100vh-70px)]">
+                <Loader2 className="w-8 h-8 animate-spin text-blue-500" />
+                <span className="ml-2 text-lg">Loading tasks...</span>
+            </div>
+        )
+    }
+
     return (
         <div className="container mx-auto min-h-[calc(100vh-70px)] flex flex-col">
-            {/* <Navbar onSearch={handleSearch} /> */}
             <div className="flex-1 p-4 md:p-6">
                 <div className="mb-6">
-                    <h1 className="text-2xl font-bold text-gray-900 mb-2">Task Management Board</h1>
+                    <div className="flex justify-between items-center mb-2">
+                        <h1 className="text-2xl font-bold text-gray-900">Task Management Board</h1>
+                        <button 
+                            onClick={fetchTasks}
+                            className="px-3 py-1 bg-blue-500 text-white rounded-md text-sm hover:bg-blue-600 flex items-center"
+                            disabled={isLoading}
+                        >
+                            <RefreshCw className={`h-4 w-4 mr-1 ${isLoading ? 'animate-spin' : ''}`} />
+                            Refresh
+                        </button>
+                    </div>
                     <div className="flex justify-between items-center">
                         <p className="text-gray-600">Organize your tasks by dragging and dropping between columns</p>
                         <div className="relative">
@@ -396,9 +450,9 @@ export default function TaskBoard() {
                         </div>
                     </div>
                     
-                    {createError && (
-                        <div className="mt-2 p-2 bg-yellow-100 border border-yellow-300 text-yellow-800 rounded-md">
-                            {createError}
+                    {error && (
+                        <div className="mt-2 p-2 bg-red-100 border border-red-300 text-red-800 rounded-md">
+                            {error}
                         </div>
                     )}
                 </div>
@@ -412,7 +466,10 @@ export default function TaskBoard() {
 
                             return (
                                 <div key={column.id} className="flex flex-col h-full">
-                                    <ColumnHeader column={column} onAddClick={() => setAddingTaskToColumn(column.id)} />
+                                    <ColumnHeader
+                                        column={column}
+                                        onAddClick={() => setAddingTaskToColumn(column.id)}
+                                    />
 
                                     {addingTaskToColumn === column.id && (
                                         <div className="relative">
@@ -433,8 +490,9 @@ export default function TaskBoard() {
                                             <div
                                                 ref={provided.innerRef}
                                                 {...provided.droppableProps}
-                                                className={`flex-grow p-2 rounded-lg min-h-[200px] ${snapshot.isDraggingOver ? "bg-gray-200" : "bg-gray-100"
-                                                    }`}
+                                                className={`flex-grow p-2 rounded-lg min-h-[200px] ${
+                                                    snapshot.isDraggingOver ? "bg-gray-200" : "bg-gray-100"
+                                                }`}
                                             >
                                                 {columnTasks.map((task, index) => (
                                                     <Draggable key={task.id} draggableId={task.id} index={index}>
@@ -446,18 +504,32 @@ export default function TaskBoard() {
                                                                 className="mb-3"
                                                             >
                                                                 {editingTask && editingTask.id === task.id ? (
-                                                                    <TaskForm
-                                                                        initialTask={task}
-                                                                        onSubmit={(taskData) => updateTask(task.id, column.id, taskData)}
-                                                                        onCancel={() => setEditingTask(null)}
-                                                                    />
+                                                                    <div className="relative">
+                                                                        <TaskForm
+                                                                            initialTask={task}
+                                                                            onSubmit={(taskData) => updateTask(task.id, column.id, taskData)}
+                                                                            onCancel={() => setEditingTask(null)}
+                                                                        />
+                                                                        {isUpdating && (
+                                                                            <div className="absolute inset-0 bg-white bg-opacity-70 flex items-center justify-center">
+                                                                                <Loader2 className="w-6 h-6 animate-spin text-blue-500" />
+                                                                            </div>
+                                                                        )}
+                                                                    </div>
                                                                 ) : (
-                                                                    <TaskCard
-                                                                        task={task}
-                                                                        columnId={column.id}
-                                                                        onDelete={deleteTask}
-                                                                        onEdit={(task, columnId) => setEditingTask(task)}
-                                                                    />
+                                                                    <div className="relative">
+                                                                        <TaskCard
+                                                                            task={task}
+                                                                            columnId={column.id}
+                                                                            onDelete={deleteTask}
+                                                                            onEdit={(task, columnId) => setEditingTask(task)}
+                                                                        />
+                                                                        {isDeleting && task.id === editingTask?.id && (
+                                                                            <div className="absolute inset-0 bg-white bg-opacity-70 flex items-center justify-center">
+                                                                                <Loader2 className="w-6 h-6 animate-spin text-blue-500" />
+                                                                            </div>
+                                                                        )}
+                                                                    </div>
                                                                 )}
                                                             </div>
                                                         )}
