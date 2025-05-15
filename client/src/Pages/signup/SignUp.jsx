@@ -46,7 +46,7 @@ const SignUp = () => {
         }
         console.log(data)
         // post by using fetch
-        fetch("https://task-management-server-beta-nine.vercel.app/users", {
+        fetch("https://task-manage-server-nine.vercel.app/users", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
