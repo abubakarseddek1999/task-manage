@@ -76,7 +76,7 @@ const SignUp = () => {
     return (
         <div className="container mx-auto px-4 min-h-[calc(100vh-70px)] flex items-center justify-center overflow-x-hidden">
             <div className="flex flex-col md:flex-row justify-center items-center w-full max-w-6xl gap-4">
-                <div className="w-full md:w-1/2 flex justify-center p-4">
+                <div className="hidden md:flex w-full md:w-1/2  justify-center p-4">
                     <img className="max-w-full h-auto object-contain" src={login || "/placeholder.svg"} alt="login" />
                 </div>
 
