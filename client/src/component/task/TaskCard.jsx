@@ -74,7 +74,15 @@ export function TaskCard({ task, columnId, onDelete, onEdit }) {
           </span>
 
           <div className="h-6 w-6 rounded-full bg-gray-200 flex items-center justify-center text-xs font-medium text-gray-600">
-            {task.assignee}
+            <span className="text-xs font-medium">
+              {(() => {
+                const name = task?.assignee || "";
+                const parts = name.trim().split(" ");
+                const first = parts[0]?.charAt(0).toUpperCase() || "";
+                const last = parts[1]?.charAt(0).toUpperCase() || "";
+                return first + last;
+              })()}
+            </span>
           </div>
         </div>
       </div>

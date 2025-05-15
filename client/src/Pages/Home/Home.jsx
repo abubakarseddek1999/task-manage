@@ -53,6 +53,9 @@ export default function TaskBoard() {
     const [isUpdating, setIsUpdating] = useState(false)
     const [isDeleting, setIsDeleting] = useState(false)
     const [error, setError] = useState(null)
+    const userData = localStorage.getItem("user")
+    const parsedData = JSON.parse(userData); // Convert JSON string to object
+    const email = parsedData.email;
 
     // Fetch tasks from API on component mount
     useEffect(() => {
@@ -77,70 +80,124 @@ export default function TaskBoard() {
     }, [searchTerm, tasks])
 
     // Fetch tasks from the API
+    // const fetchTasks = async () => {
+    //     try {
+    //         setIsLoading(true)
+    //         setError(null)
+
+    //         const response = await fetch('http://localhost:3000/tasks')
+    //         if (!response.ok) {
+    //             throw new Error(`Error: ${response.status}`)
+    //         }
+
+    //         const tasksData = await response.json()
+    //         console.log("Fetched tasks:", tasksData)
+
+    //         // Transform API data to our app's format
+    //         const tasksById = {}
+    //         const columnsCopy = JSON.parse(JSON.stringify(initialColumns))
+
+    //         tasksData.forEach((task) => {
+    //             // Determine which column this task belongs to
+    //             const status = task.status || 'todo'
+    //             const columnId = status.toLowerCase()
+
+    //             // Create task object in our format
+    //             tasksById[task._id] = {
+    //                 id: task._id,
+    //                 content: task.title,
+    //                 priority: task.priority || "medium",
+    //                 label: task.label || "",
+    //                 date: task.dueDate || "",
+    //                 assignee: task.assignee || task.assigne || "",
+    //                 status: columnId,
+    //                 // Keep original data for API updates
+    //                 originalData: task
+    //             }
+
+    //             // Add task to appropriate column
+    //             if (columnsCopy[columnId]) {
+    //                 columnsCopy[columnId].taskIds.push(task._id)
+    //             } else if (columnId === "completed") {
+    //                 // Handle case sensitivity for "Completed" column
+    //                 columnsCopy.Completed.taskIds.push(task._id)
+    //             } else {
+    //                 // If column doesn't exist, add to todo
+    //                 columnsCopy.todo.taskIds.push(task._id)
+    //             }
+    //         })
+
+    //         setTasks(tasksById)
+    //         setColumns(columnsCopy)
+    //         setFilteredTasks(tasksById)
+    //     } catch (err) {
+    //         console.error("Failed to fetch tasks:", err)
+    //         setError("Failed to load tasks. Please try again.")
+    //     } finally {
+    //         setIsLoading(false)
+    //     }
+    // }
     const fetchTasks = async () => {
         try {
-            setIsLoading(true)
-            setError(null)
-            
-            const response = await fetch('http://localhost:3000/tasks')
+            setIsLoading(true);
+            setError(null);
+    
+            // Add email query param (assuming you have user.email)
+            const response = await fetch(`http://localhost:3000/tasks?email=${email}`);
+
             if (!response.ok) {
-                throw new Error(`Error: ${response.status}`)
+                throw new Error(`Error: ${response.status}`);
             }
-            
-            const tasksData = await response.json()
-            console.log("Fetched tasks:", tasksData)
-            
+    
+            const tasksData = await response.json();
+            console.log("Fetched tasks:", tasksData);
+    
             // Transform API data to our app's format
-            const tasksById = {}
-            const columnsCopy = JSON.parse(JSON.stringify(initialColumns))
-            
+            const tasksById = {};
+            const columnsCopy = JSON.parse(JSON.stringify(initialColumns));
+    
             tasksData.forEach((task) => {
-                // Determine which column this task belongs to
-                const status = task.status || 'todo'
-                const columnId = status.toLowerCase()
-                
-                // Create task object in our format
+                const status = task.status || 'todo';
+                const columnId = status.toLowerCase();
+    
                 tasksById[task._id] = {
                     id: task._id,
                     content: task.title,
                     priority: task.priority || "medium",
                     label: task.label || "",
                     date: task.dueDate || "",
-                    assignee: task.assignee || task.assigne || "",
+                    assignee: task.assignee || task.assigne || "", // support both
                     status: columnId,
-                    // Keep original data for API updates
                     originalData: task
-                }
-                
-                // Add task to appropriate column
+                };
+    
                 if (columnsCopy[columnId]) {
-                    columnsCopy[columnId].taskIds.push(task._id)
+                    columnsCopy[columnId].taskIds.push(task._id);
                 } else if (columnId === "completed") {
-                    // Handle case sensitivity for "Completed" column
-                    columnsCopy.Completed.taskIds.push(task._id)
+                    columnsCopy.Completed.taskIds.push(task._id);
                 } else {
-                    // If column doesn't exist, add to todo
-                    columnsCopy.todo.taskIds.push(task._id)
+                    columnsCopy.todo.taskIds.push(task._id);
                 }
-            })
-            
-            setTasks(tasksById)
-            setColumns(columnsCopy)
-            setFilteredTasks(tasksById)
+            });
+    
+            setTasks(tasksById);
+            setColumns(columnsCopy);
+            setFilteredTasks(tasksById);
         } catch (err) {
-            console.error("Failed to fetch tasks:", err)
-            setError("Failed to load tasks. Please try again.")
+            console.error("Failed to fetch tasks:", err);
+            setError("Failed to load tasks. Please try again.");
         } finally {
-            setIsLoading(false)
+            setIsLoading(false);
         }
-    }
+    };
+    
 
     // Create a task in the database
     const createTask = async (columnId, taskData) => {
         try {
             setIsCreating(true)
             setError(null)
-            
+
             // Prepare task data for API
             const newTaskData = {
                 title: taskData.content,
@@ -148,11 +205,12 @@ export default function TaskBoard() {
                 label: taskData.label,
                 dueDate: taskData.date,
                 assigne: taskData.assigne, // Using the field name from your TaskForm
-                status: columnId
+                status: columnId,
+                email:email
             }
-            
+
             console.log("Creating task with data:", newTaskData)
-            
+
             const response = await fetch('http://localhost:3000/tasks', {
                 method: 'POST',
                 headers: {
@@ -160,17 +218,17 @@ export default function TaskBoard() {
                 },
                 body: JSON.stringify({ task: newTaskData })
             })
-            
+
             if (!response.ok) {
                 throw new Error(`Error: ${response.status}`)
             }
-            
+
             const result = await response.json()
             console.log("Task created successfully:", result)
-            
+
             // Refresh tasks to get the latest data
             await fetchTasks()
-            
+
             return result
         } catch (err) {
             console.error("Failed to create task:", err)
@@ -186,9 +244,9 @@ export default function TaskBoard() {
         try {
             setIsUpdating(true)
             setError(null)
-            
+
             console.log("Updating task:", taskId, "with data:", updatedData)
-            
+
             const response = await fetch(`http://localhost:3000/task/${taskId}`, {
                 method: 'PATCH',
                 headers: {
@@ -196,14 +254,14 @@ export default function TaskBoard() {
                 },
                 body: JSON.stringify({ task: updatedData })
             })
-            
+
             if (!response.ok) {
                 throw new Error(`Error: ${response.status}`)
             }
-            
+
             const result = await response.json()
             console.log("Task updated successfully:", result)
-            
+
             return result
         } catch (err) {
             console.error("Failed to update task:", err)
@@ -219,20 +277,20 @@ export default function TaskBoard() {
         try {
             setIsDeleting(true)
             setError(null)
-            
+
             console.log("Deleting task:", taskId)
-            
+
             const response = await fetch(`http://localhost:3000/task/${taskId}`, {
                 method: 'DELETE'
             })
-            
+
             if (!response.ok) {
                 throw new Error(`Error: ${response.status}`)
             }
-            
+
             const result = await response.json()
             console.log("Task deleted successfully:", result)
-            
+
             return result
         } catch (err) {
             console.error("Failed to delete task:", err)
@@ -283,9 +341,9 @@ export default function TaskBoard() {
                 ...task.originalData,
                 status: destColumn.id
             }
-            
+
             await updateTaskInDb(draggableId, updatedTask)
-            
+
             // Update local task state
             setTasks({
                 ...tasks,
@@ -319,11 +377,11 @@ export default function TaskBoard() {
     const updateTask = async (taskId, columnId, taskData) => {
         try {
             const existingTask = tasks[taskId]
-            
+
             if (!existingTask) {
                 throw new Error(`Task with ID ${taskId} not found`)
             }
-            
+
             // Prepare updated task data for API
             const updatedTaskData = {
                 ...existingTask.originalData,
@@ -333,7 +391,7 @@ export default function TaskBoard() {
                 dueDate: taskData.date,
                 assigne: taskData.assigne // Using the field name from your TaskForm
             }
-            
+
             // Update local state first for immediate UI feedback
             setTasks({
                 ...tasks,
@@ -346,13 +404,13 @@ export default function TaskBoard() {
                     assignee: taskData.assigne,
                 }
             })
-            
+
             // Send to API
             await updateTaskInDb(taskId, updatedTaskData)
-            
+
             // Refresh tasks to get the latest data
             await fetchTasks()
-            
+
             setEditingTask(null)
         } catch (err) {
             // Error is already handled in updateTaskInDb
@@ -365,10 +423,10 @@ export default function TaskBoard() {
             // Update local state first for immediate UI feedback
             const newTasks = { ...tasks }
             delete newTasks[taskId]
-            
+
             const column = columns[columnId]
             const newTaskIds = column.taskIds.filter((id) => id !== taskId)
-            
+
             setTasks(newTasks)
             setColumns({
                 ...columns,
@@ -377,7 +435,7 @@ export default function TaskBoard() {
                     taskIds: newTaskIds,
                 }
             })
-            
+
             // Delete from API
             await deleteTaskFromDb(taskId)
         } catch (err) {
@@ -397,7 +455,7 @@ export default function TaskBoard() {
             <div className={`${column.color} ${column.textColor} p-3 rounded-t-lg flex justify-between items-center`}>
                 <div className="flex items-center">
                     <h3 className="font-semibold">{column.title}</h3>
-                    <span className="ml-2 bg-white bg-opacity-30 text-white text-xs px-2 py-1 rounded-full">
+                    <span className="ml-2 bg-white bg-opacity-30 text-black text-xs px-2 py-1 rounded-full">
                         {column.taskIds.length}
                     </span>
                 </div>
@@ -427,7 +485,7 @@ export default function TaskBoard() {
                 <div className="mb-6">
                     <div className="flex justify-between items-center mb-2">
                         <h1 className="text-2xl font-bold text-gray-900">Task Management Board</h1>
-                        <button 
+                        <button
                             onClick={fetchTasks}
                             className="px-3 py-1 bg-blue-500 text-white rounded-md text-sm hover:bg-blue-600 flex items-center"
                             disabled={isLoading}
@@ -449,7 +507,7 @@ export default function TaskBoard() {
                             <Search className="absolute right-3 top-2.5 h-4 w-4 text-gray-400" />
                         </div>
                     </div>
-                    
+
                     {error && (
                         <div className="mt-2 p-2 bg-red-100 border border-red-300 text-red-800 rounded-md">
                             {error}
@@ -470,7 +528,7 @@ export default function TaskBoard() {
                                         column={column}
                                         onAddClick={() => setAddingTaskToColumn(column.id)}
                                     />
-
+                                    {/* check user has */}
                                     {addingTaskToColumn === column.id && (
                                         <div className="relative">
                                             <TaskForm
@@ -490,9 +548,8 @@ export default function TaskBoard() {
                                             <div
                                                 ref={provided.innerRef}
                                                 {...provided.droppableProps}
-                                                className={`flex-grow p-2 rounded-lg min-h-[200px] ${
-                                                    snapshot.isDraggingOver ? "bg-gray-200" : "bg-gray-100"
-                                                }`}
+                                                className={`flex-grow p-2 rounded-lg min-h-[200px] md:min-h-[250px] lg:min-h-[calc(100vh-300px)] ${snapshot.isDraggingOver ? "bg-gray-200" : "bg-gray-100"
+                                                    }`}
                                             >
                                                 {columnTasks.map((task, index) => (
                                                     <Draggable key={task.id} draggableId={task.id} index={index}>

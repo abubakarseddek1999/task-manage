@@ -96,15 +96,21 @@ async function run() {
             }
         });
 
-        // make api for get all task and send to client task data as response 
+        // make api for get all task filter by eamil and send to client task data as response 
         app.get('/tasks', async (req, res) => {
+            const { email } = req.query;
+          console.log(email)
+            const filter = email ? { email } : {}; // যদি email থাকে, সেটার ওপর filter করবে
+          
             try {
-                const result = await taskCollection.find({}).toArray();
-                res.json(result);
+              const result = await taskCollection.find(filter).toArray();
+              res.json(result);
             } catch (error) {
-                res.status(500).json({ error });
+              console.error("Failed to fetch tasks:", error);
+              res.status(500).json({ error: "Failed to fetch tasks" });
             }
-        });
+          });
+          
 
         // make api for get task by id and send to client task data as response 
         app.get('/task/:id', async (req, res) => {

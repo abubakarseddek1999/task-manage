@@ -42,10 +42,10 @@ export function Navbar({ onSearch }) {
     }
   }, [profileRef])
 
-  const handleSearch = (e) => {
-    setSearchQuery(e.target.value)
-    onSearch(e.target.value)
-  }
+  // const handleSearch = (e) => {
+  //   setSearchQuery(e.target.value)
+  //   onSearch(e.target.value)
+  // }
   const handleLogOut = () => {
     // Add your logout logic here
     localStorage.removeItem("token")
@@ -96,7 +96,7 @@ export function Navbar({ onSearch }) {
           </div>
 
           {/* Search bar - hidden on mobile */}
-          <div className="hidden md:flex items-center px-2 lg:ml-6 lg:justify-end">
+          {/* <div className="hidden md:flex items-center px-2 lg:ml-6 lg:justify-end">
             <div className="max-w-lg w-full lg:max-w-xs relative">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                 <Search className="h-5 w-5 text-gray-400" />
@@ -110,7 +110,7 @@ export function Navbar({ onSearch }) {
                 onChange={handleSearch}
               />
             </div>
-          </div>
+          </div> */}
 
           {/* Right side icons and profile */}
           <div className="hidden sm:ml-6 sm:flex sm:items-center">
@@ -240,7 +240,7 @@ export function Navbar({ onSearch }) {
           </div>
 
           {/* Mobile search */}
-          <div className="pt-2 pb-3 px-4">
+          {/* <div className="pt-2 pb-3 px-4">
             <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                 <Search className="h-5 w-5 text-gray-400" />
@@ -254,67 +254,68 @@ export function Navbar({ onSearch }) {
                 onChange={handleSearch}
               />
             </div>
-          </div>
+          </div> */}
 
           {/* Mobile profile section */}
-         {user ? (
-           <div className="pt-4 pb-3 border-t border-gray-200">
-           <div className="flex items-center px-4">
-             <div className="flex-shrink-0">
-               <div className="h-10 w-10 rounded-full bg-[#8A75C9] flex items-center justify-center text-white">
-                 <span className="text-xs font-medium">
-                   {(() => {
-                     const name = user?.name || "";
-                     const parts = name.trim().split(" ");
-                     const first = parts[0]?.charAt(0).toUpperCase() || "";
-                     const last = parts[1]?.charAt(0).toUpperCase() || "";
-                     return first + last;
-                   })()}
-                 </span>
-               </div>
-             </div>
-             <div className="ml-3">
-               <div className="text-base font-medium text-gray-800">{user?.name}</div>
-               <div className="text-sm font-medium text-gray-500">{user?.email}</div>
-             </div>
-             {/* <button
+          {user ? (
+            <div className="pt-4 pb-3 border-t border-gray-200">
+              <div className="flex items-center px-4">
+                <div className="flex-shrink-0">
+                  <div className="h-10 w-10 rounded-full bg-[#8A75C9] flex items-center justify-center text-white">
+                    <span className="text-xs font-medium">
+                      {(() => {
+                        const name = user?.name || "";
+                        const parts = name.trim().split(" ");
+                        const first = parts[0]?.charAt(0).toUpperCase() || "";
+                        const last = parts[1]?.charAt(0).toUpperCase() || "";
+                        return first + last;
+                      })()}
+                    </span>
+                  </div>
+                </div>
+                <div className="ml-3">
+                  <div className="text-base font-medium text-gray-800">{user?.name}</div>
+                  <div className="text-sm font-medium text-gray-500">{user?.country}</div>
+                  <div className="text-sm font-medium text-gray-500">{user?.email}</div>
+                </div>
+                {/* <button
                type="button"
                className="ml-auto flex-shrink-0 p-1 rounded-full text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#7BC86C] relative"
              >
                <Bell className="h-5 w-5" />
                <span className="absolute top-0 right-0 block h-2 w-2 rounded-full bg-red-500 ring-2 ring-white" />
              </button> */}
-           </div>
-           <div className="mt-3 space-y-1">
-             <a
-               href="/profile"
-               className="flex items-center px-4 py-2 text-base font-medium text-gray-500 hover:text-gray-800 hover:bg-gray-100"
-             >
-               <UserCircle className="mr-3 h-5 w-5 text-gray-500" />
-               Your Profile
-             </a>
-             <a
-               href="/settings"
-               className="flex items-center px-4 py-2 text-base font-medium text-gray-500 hover:text-gray-800 hover:bg-gray-100"
-             >
-               <Settings className="mr-3 h-5 w-5 text-gray-500" />
-               Settings
-             </a>
-             <a
-               href="/signout"
-               className="flex items-center px-4 py-2 text-base font-medium text-gray-500 hover:text-gray-800 hover:bg-gray-100"
-             >
-               <LogOut className="mr-3 h-5 w-5 text-gray-500" />
-               Sign out
-             </a>
-           </div>
-         </div>) :(
-          <Link to="/login" >
-            <button className="px-4 block w-full py-2 bg-[#8A75C9] text-white rounded hover:bg-[#7a65b5] transition mb-5">
-              Login
-            </button>
-          </Link>
-         )}
+              </div>
+              <div className="mt-3 space-y-1">
+                <a
+                  href="/profile"
+                  className="flex items-center px-4 py-2 text-base font-medium text-gray-500 hover:text-gray-800 hover:bg-gray-100"
+                >
+                  <UserCircle className="mr-3 h-5 w-5 text-gray-500" />
+                  Your Profile
+                </a>
+                <a
+                  href="/settings"
+                  className="flex items-center px-4 py-2 text-base font-medium text-gray-500 hover:text-gray-800 hover:bg-gray-100"
+                >
+                  <Settings className="mr-3 h-5 w-5 text-gray-500" />
+                  Settings
+                </a>
+                <a
+                  href="/signout"
+                  className="flex items-center px-4 py-2 text-base font-medium text-gray-500 hover:text-gray-800 hover:bg-gray-100"
+                >
+                  <LogOut className="mr-3 h-5 w-5 text-gray-500" />
+                  Sign out
+                </a>
+              </div>
+            </div>) : (
+            <Link to="/login" >
+              <button className="px-4 block w-full py-2 bg-[#8A75C9] text-white rounded hover:bg-[#7a65b5] transition mb-5">
+                Login
+              </button>
+            </Link>
+          )}
         </div>
       )}
     </nav>
