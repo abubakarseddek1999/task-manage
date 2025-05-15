@@ -40,11 +40,10 @@ export function TaskForm({ onSubmit, onCancel, initialTask = null }) {
         value={content}
         onChange={(e) => setContent(e.target.value)}
         placeholder="Enter task..."
-        className="w-full text-sm border border-gray-300 rounded-md px-3 py-2 focus:outline-none mb-2 resize-none"
+        className="w-full text-sm border border-gray-300 rounded-md px-3 py-2 focus:outline-none mb-2 "
         autoFocus
-        rows={3}
+        rows={5}
       />
-
 
       <div className="flex items-center mb-2">
         <div className="relative flex-1">

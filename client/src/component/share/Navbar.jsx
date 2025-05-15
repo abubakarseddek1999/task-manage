@@ -160,6 +160,7 @@ export function Navbar({ onSearch }) {
                   >
                     <div className="px-4 py-3 border-b border-gray-100">
                       <p className="text-sm font-medium text-gray-900">{user?.name}</p>
+                      <p className="text-xs text-gray-500 truncate">{user?.country}</p>
                       <p className="text-xs text-gray-500 truncate">{user?.email}</p>
                     </div>
                     {/* <a
