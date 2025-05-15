@@ -80,64 +80,6 @@ export default function TaskBoard() {
         setFilteredTasks(filtered)
     }, [searchTerm, tasks])
 
-    // Fetch tasks from the API
-    // const fetchTasks = async () => {
-    //     try {
-    //         setIsLoading(true)
-    //         setError(null)
-
-    //         const response = await fetch('http://localhost:3000/tasks')
-    //         if (!response.ok) {
-    //             throw new Error(`Error: ${response.status}`)
-    //         }
-
-    //         const tasksData = await response.json()
-    //         console.log("Fetched tasks:", tasksData)
-
-    //         // Transform API data to our app's format
-    //         const tasksById = {}
-    //         const columnsCopy = JSON.parse(JSON.stringify(initialColumns))
-
-    //         tasksData.forEach((task) => {
-    //             // Determine which column this task belongs to
-    //             const status = task.status || 'todo'
-    //             const columnId = status.toLowerCase()
-
-    //             // Create task object in our format
-    //             tasksById[task._id] = {
-    //                 id: task._id,
-    //                 content: task.title,
-    //                 priority: task.priority || "medium",
-    //                 label: task.label || "",
-    //                 date: task.dueDate || "",
-    //                 assignee: task.assignee || task.assigne || "",
-    //                 status: columnId,
-    //                 // Keep original data for API updates
-    //                 originalData: task
-    //             }
-
-    //             // Add task to appropriate column
-    //             if (columnsCopy[columnId]) {
-    //                 columnsCopy[columnId].taskIds.push(task._id)
-    //             } else if (columnId === "completed") {
-    //                 // Handle case sensitivity for "Completed" column
-    //                 columnsCopy.Completed.taskIds.push(task._id)
-    //             } else {
-    //                 // If column doesn't exist, add to todo
-    //                 columnsCopy.todo.taskIds.push(task._id)
-    //             }
-    //         })
-
-    //         setTasks(tasksById)
-    //         setColumns(columnsCopy)
-    //         setFilteredTasks(tasksById)
-    //     } catch (err) {
-    //         console.error("Failed to fetch tasks:", err)
-    //         setError("Failed to load tasks. Please try again.")
-    //     } finally {
-    //         setIsLoading(false)
-    //     }
-    // }
     const fetchTasks = async () => {
         try {
             setIsLoading(true);
@@ -478,14 +420,7 @@ export default function TaskBoard() {
         }
     };
 
-    if (isLoading) {
-        return (
-            <div className="flex items-center justify-center min-h-[calc(100vh-70px)]">
-                <Loader2 className="w-8 h-8 animate-spin text-blue-500" />
-                <span className="ml-2 text-lg">Loading tasks...</span>
-            </div>
-        )
-    }
+
 
     return (
         <div className="container mx-auto min-h-[calc(100vh-70px)] flex flex-col">
