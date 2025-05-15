@@ -4,16 +4,22 @@ const { MongoClient, ServerApiVersion } = require('mongodb');
 const jwt = require('jsonwebtoken');
 const app = express();
 const port = process.env.PORT || 3000;
-
+require('dotenv').config();
 app.use(cors());
 app.use(express.json());
 
-// task-management
-// iumJzbcBSooQFUul
+// middleware
+app.use(cors({
+    origin: [
+        'http://localhost:5173',
+        "https://task-manage-orcin.vercel.app/",
 
+    ],
+    credentials: true,
+}));
+console.log(process.env.DB_USER)
 
-
-const uri = "mongodb+srv://task-management:iumJzbcBSooQFUul@cluster0.bidtnbd.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
+const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.bidtnbd.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
 const client = new MongoClient(uri, {
