@@ -18,7 +18,7 @@ export function Navbar({ onSearch }) {
       const parsedData = JSON.parse(userData); // Convert JSON string to object
       const id = parsedData.id; // Access the id
       // featch user data from api using id
-      fetch(`http://localhost:3000/user/${id}`)
+      fetch(`https://task-management-server-beta-nine.vercel.app/user/${id}`)
         .then(response => response.json())
         .then(data => {
           setUser(data);

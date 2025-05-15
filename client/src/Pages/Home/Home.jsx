@@ -86,7 +86,7 @@ export default function TaskBoard() {
             setError(null);
     
             // Add email query param (assuming you have user.email)
-            const response = await fetch(`http://localhost:3000/tasks?email=${email}`);
+            const response = await fetch(`https://task-management-server-beta-nine.vercel.app/tasks?email=${email}`);
 
             if (!response.ok) {
                 throw new Error(`Error: ${response.status}`);
@@ -154,7 +154,7 @@ export default function TaskBoard() {
 
             console.log("Creating task with data:", newTaskData)
 
-            const response = await fetch('http://localhost:3000/tasks', {
+            const response = await fetch('https://task-management-server-beta-nine.vercel.app/tasks', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -190,7 +190,7 @@ export default function TaskBoard() {
 
             console.log("Updating task:", taskId, "with data:", updatedData)
 
-            const response = await fetch(`http://localhost:3000/task/${taskId}`, {
+            const response = await fetch(`https://task-management-server-beta-nine.vercel.app/task/${taskId}`, {
                 method: 'PATCH',
                 headers: {
                     'Content-Type': 'application/json'
@@ -223,7 +223,7 @@ export default function TaskBoard() {
 
             console.log("Deleting task:", taskId)
 
-            const response = await fetch(`http://localhost:3000/task/${taskId}`, {
+            const response = await fetch(`https://task-management-server-beta-nine.vercel.app/task/${taskId}`, {
                 method: 'DELETE'
             })
 

@@ -23,7 +23,7 @@ const Login = () => {
     
     //     const data = { email, password };
     
-    //     fetch("http://localhost:3000/login", {
+    //     fetch("https://task-management-server-beta-nine.vercel.app/login", {
     //         method: "POST",
     //         headers: {
     //             "Content-Type": "application/json",
@@ -67,7 +67,7 @@ const Login = () => {
     
         const data = { email, password };
     
-        fetch("http://localhost:3000/login", {
+        fetch("https://task-management-server-beta-nine.vercel.app/login", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
