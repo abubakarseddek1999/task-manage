@@ -26,8 +26,13 @@ export function TaskCard({ task, columnId, onDelete, onEdit }) {
       {task.label && <div className={`h-1.5 w-full ${task.label} rounded-t-md`}></div>}
       <div className="p-3">
         <div className="flex justify-between items-start">
-          <div className="flex-1 pr-2">
-            <p className="text-sm font-medium text-gray-800">{task.content}</p>
+          <div className="pr-2 w-[80%]">
+            <div className="text-sm font-medium text-gray-800 break-words whitespace-normal">
+              {task.content}
+            </div>
+
+
+
 
             {task.date && (
               <div className="flex items-center mt-2 text-xs text-gray-500">

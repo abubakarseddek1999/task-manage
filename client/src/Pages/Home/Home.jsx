@@ -20,7 +20,7 @@ const initialColumns = {
         id: "inprogress",
         title: "In Progress",
         taskIds: [],
-        color: "bg-[#7BC86C]",
+        color: "bg-[#F5C24C]",
         textColor: "text-white",
     },
     review: {
@@ -34,7 +34,7 @@ const initialColumns = {
         id: "Completed",
         title: "Completed",
         taskIds: [],
-        color: "bg-[#F5C24C]",
+        color: "bg-[#7BC86C]",
         textColor: "text-white",
     },
 }

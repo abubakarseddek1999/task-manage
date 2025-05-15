@@ -36,13 +36,15 @@ export function TaskForm({ onSubmit, onCancel, initialTask = null }) {
 
   return (
     <form onSubmit={handleSubmit} className="bg-white p-3 rounded-md border border-gray-200 shadow-sm mb-3">
-      <input
+      <textarea
         value={content}
         onChange={(e) => setContent(e.target.value)}
         placeholder="Enter task..."
-        className="w-full text-sm border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 mb-2"
+        className="w-full text-sm border border-gray-300 rounded-md px-3 py-2 focus:outline-none mb-2 resize-none"
         autoFocus
+        rows={3}
       />
+
 
       <div className="flex items-center mb-2">
         <div className="relative flex-1">
