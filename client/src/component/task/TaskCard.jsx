@@ -27,9 +27,10 @@ export function TaskCard({ task, columnId, onDelete, onEdit }) {
       <div className="p-3">
         <div className="flex justify-between items-start">
           <div className="pr-2 w-[80%]">
-            <div className="text-sm font-medium text-gray-800 break-words whitespace-normal">
-              {task.content}
-            </div>
+            <div
+              className="text-sm font-medium text-gray-800 break-words whitespace-normal"
+              dangerouslySetInnerHTML={{ __html: task.content }}
+            ></div>
 
 
 

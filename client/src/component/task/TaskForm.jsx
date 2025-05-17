@@ -1,5 +1,9 @@
+"use client"
+
 import { useState } from "react"
 import { Calendar } from "lucide-react"
+import { TextEditor } from "./TextEditor"
+
 
 export function TaskForm({ onSubmit, onCancel, initialTask = null }) {
   const [content, setContent] = useState(initialTask ? initialTask.content : "")
@@ -13,8 +17,8 @@ export function TaskForm({ onSubmit, onCancel, initialTask = null }) {
     if (!content.trim()) return
     // if have a user data in local storage get it
     const userData = localStorage.getItem("user")
-    const parsedData = JSON.parse(userData);
-    const userName = parsedData.name;
+    const parsedData = userData ? JSON.parse(userData) : { name: "Anonymous" }
+    const userName = parsedData.name
 
     onSubmit({
       content,
@@ -34,14 +38,7 @@ export function TaskForm({ onSubmit, onCancel, initialTask = null }) {
 
   return (
     <form onSubmit={handleSubmit} className="bg-white p-3 rounded-md border border-gray-200 shadow-sm mb-3">
-      <textarea
-        value={content}
-        onChange={(e) => setContent(e.target.value)}
-        placeholder="Enter task..."
-        className="w-full text-sm border border-gray-300 rounded-md px-3 py-2 focus:outline-none mb-2 "
-        autoFocus
-        rows={5}
-      />
+      <TextEditor content={content} onChange={setContent} placeholder="Enter task..." />
 
       <div className="flex items-center mb-2">
         <div className="relative flex-1">
