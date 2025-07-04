@@ -38,7 +38,7 @@ export function TaskCard({ task, columnId, onDelete, onEdit }) {
             {task.date && (
               <div className="flex items-center mt-2 text-xs text-gray-500">
                 <Calendar className="h-3 w-3 mr-1" />
-                {task.date}
+                {task?.date}
               </div>
             )}
           </div>
@@ -76,7 +76,7 @@ export function TaskCard({ task, columnId, onDelete, onEdit }) {
 
         <div className="flex justify-between items-center mt-3">
           <span className={`inline-block px-2 py-0.5 text-xs font-medium rounded ${priorityInfo.className}`}>
-            {priorityInfo.text}
+            {priorityInfo?.text}
           </span>
 
           <div className="h-6 w-6 rounded-full bg-gray-200 flex items-center justify-center text-xs font-medium text-gray-600">
